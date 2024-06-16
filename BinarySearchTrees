@@ -1,0 +1,368 @@
+/*
+ * Structure: Node
+ * ---------------
+ * Represents a node in a binary search tree (BST).
+ *
+ * Fields:
+ * - data: Integer value stored in the node.
+ * - left: Pointer to the left child node.
+ * - right: Pointer to the right child node.
+ *
+ * Usage:
+ * - Each Node structure contains an integer `data` and pointers `left` and `right` for left and right children.
+ * - Used to construct a binary search tree where each node stores an integer value and points to its children.
+ * - Typical operations include insertion, deletion, searching, and traversal of nodes in the BST.
+ *
+ * Notes:
+ * - The structure supports dynamic creation of nodes in a binary search tree.
+ * - Proper initialization and memory management of nodes are essential for the correct functioning of BST operations.
+ */
+typedef struct _node {
+    int data;               // Integer value stored in the node
+    struct _node* left;     // Pointer to the left child node
+    struct _node* right;    // Pointer to the right child node
+} Node;
+
+
+/*
+ * Structure: BST
+ * --------------
+ * Represents a binary search tree (BST).
+ *
+ * Fields:
+ * - root: Pointer to the root node of the BST.
+ * - len: Integer representing the number of nodes in the BST.
+ *
+ * Usage:
+ * - The `BST` structure encapsulates a binary search tree where each node is represented by the `Node` structure.
+ * - Contains a pointer `root` to the root node of the BST and an integer `len` indicating the number of nodes in the tree.
+ * - Used for implementing operations such as insertion, deletion, searching, and traversal on the BST.
+ *
+ * Notes:
+ * - Proper initialization and management of the `BST` structure, including its nodes (`Node` structures), are essential for correct functioning of BST operations.
+ * - Provides a hierarchical data structure that allows efficient searching and retrieval of elements based on the binary search tree properties.
+ */
+typedef struct _bst {
+    Node* root;    // Pointer to the root node of the BST
+    int len;       // Number of nodes in the BST
+} BST;
+
+
+/*
+ * Function: createNode
+ * --------------------
+ * Creates a new node for a binary search tree (BST) with the specified integer value.
+ *
+ * Parameters:
+ * - val: Integer value to be stored in the new node.
+ *
+ * Returns:
+ * - Pointer to the newly created Node structure.
+ *
+ * Operation:
+ * - Allocates memory for a new Node structure using malloc.
+ * - Initializes the node with the provided integer value (`val`), and sets its left and right child pointers to NULL.
+ * - Returns a pointer to the newly created Node.
+ *
+ * Usage:
+ * - Call this function to dynamically create a new Node structure for a binary search tree.
+ * - Ensure to assign the returned pointer to an appropriate Node pointer variable in the BST.
+ *
+ * Notes:
+ * - Proper memory management is essential. Ensure to free the memory allocated for nodes that are no longer needed to prevent memory leaks.
+ * - This function assumes sufficient memory is available and does not handle allocation failures explicitly for simplicity.
+ */
+Node* createNode(int val)
+{
+    Node* x = (Node*)malloc(sizeof(Node));    // Allocate memory for a new Node
+    x->data = val;                           // Initialize node with the provided value
+    x->left = NULL;                          // Initialize left child pointer to NULL
+    x->right = NULL;                         // Initialize right child pointer to NULL
+    return x;                                // Return pointer to the newly created Node
+}
+
+
+/*
+ * Function: createBst
+ * -------------------
+ * Creates a new empty binary search tree (BST).
+ *
+ * Returns:
+ * - Pointer to the newly created BST structure.
+ *
+ * Operation:
+ * - Allocates memory for a new BST structure using malloc.
+ * - Initializes the root pointer (`root`) to NULL, indicating an empty tree.
+ * - Sets the length (`len`) to 0, indicating initially no nodes in the BST.
+ * - Returns a pointer to the newly created BST.
+ *
+ * Usage:
+ * - Call this function to dynamically create a new empty binary search tree.
+ * - Ensure to assign the returned pointer to an appropriate BST pointer variable for further operations on the tree.
+ *
+ * Notes:
+ * - Proper memory management is essential. Ensure to free the memory allocated for the BST when no longer needed to prevent memory leaks.
+ * - This function assumes sufficient memory is available and does not handle allocation failures explicitly for simplicity.
+ */
+BST* createBst()
+{
+    BST* b = (BST*)malloc(sizeof(BST));    // Allocate memory for a new BST
+    b->root = NULL;                       // Initialize root pointer to NULL (empty tree)
+    b->len = 0;                           // Initialize length (number of nodes) to 0
+    return b;                             // Return pointer to the newly created BST
+}
+
+
+/*
+ * Function: insertNode
+ * --------------------
+ * Inserts a new node with the specified integer data into the binary search tree (BST).
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ * - data: Integer value to be inserted into the BST.
+ *
+ * Returns:
+ * - Pointer to the root node of the modified subtree after insertion.
+ *
+ * Operation:
+ * - Recursively traverses the BST to find the appropriate position to insert the new node with `data`.
+ * - If `root` is NULL (empty subtree), creates a new node with `data` using `createNode` function and returns it.
+ * - If `data` is greater than the `root->data`, recursively inserts `data` into the right subtree.
+ * - If `data` is less than the `root->data`, recursively inserts `data` into the left subtree.
+ * - Returns the root pointer of the modified subtree after insertion.
+ *
+ * Usage:
+ * - Call this function to insert a new node with `data` into the BST.
+ * - Ensure `root` points to the correct subtree in the BST where insertion is to be performed.
+ *
+ * Notes:
+ * - Proper memory management for nodes (`createNode` function) and BST structure is essential to prevent memory leaks.
+ * - This function assumes sufficient memory is available and does not handle allocation failures explicitly for simplicity.
+ */
+Node* insertNode(Node* root, int data)
+{
+    if (root == NULL) {
+        return createNode(data);   // Create a new node if subtree is empty
+    } else if (data > root->data) {
+        root->right = insertNode(root->right, data);   // Insert into right subtree if data is greater
+    } else if (data < root->data) {
+        root->left = insertNode(root->left, data);     // Insert into left subtree if data is less
+    }
+    return root;   // Return the root pointer of the modified subtree
+}
+
+
+/*
+ * Function: deleteNode
+ * --------------------
+ * Deletes the node with the specified integer data from the binary search tree (BST), if it exists.
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ * - data: Integer value to be deleted from the BST.
+ *
+ * Returns:
+ * - Pointer to the root node of the modified subtree after deletion.
+ *
+ * Operation:
+ * - Recursively traverses the BST to find the node with `data` to be deleted.
+ * - If `root` is NULL (empty subtree), returns NULL.
+ * - If `data` is greater than `root->data`, recursively deletes `data` from the right subtree.
+ * - If `data` is less than `root->data`, recursively deletes `data` from the left subtree.
+ * - If `data` matches `root->data`, handles deletion:
+ *   - If the node has no left child, returns its right child.
+ *   - If the node has no right child, returns its left child.
+ *   - If the node has both children, finds the inorder successor (smallest node in right subtree),
+ *     copies its data to the current node, and recursively deletes the inorder successor.
+ * - Returns the root pointer of the modified subtree after deletion.
+ *
+ * Usage:
+ * - Call this function to delete a node with `data` from the BST.
+ * - Ensure `root` points to the correct subtree in the BST where deletion is to be performed.
+ *
+ * Notes:
+ * - Proper memory management for nodes and the BST structure is essential to prevent memory leaks.
+ * - This function assumes sufficient memory is available and does not handle allocation failures explicitly for simplicity.
+ */
+Node* deleteNode(Node* root, int data)
+{
+    if (root == NULL) {
+        return root;   // Return NULL if subtree is empty
+    } else if (data > root->data) {
+        root->right = deleteNode(root->right, data);   // Recursively delete from right subtree
+    } else if (data < root->data) {
+        root->left = deleteNode(root->left, data);     // Recursively delete from left subtree
+    } else {
+        // Node to be deleted found
+        if (root->left == NULL) {
+            return root->right;   // Case 1: No left child
+        } else if (root->right == NULL) {
+            return root->left;    // Case 2: No right child
+        } else {
+            // Case 3: Node has both left and right children
+            Node* succParent = root;
+            Node* succ = root->right;
+
+            // Find the inorder successor (minimum value node in right subtree)
+            while (succ->left != NULL) {
+                succParent = succ;
+                succ = succ->left;
+            }
+
+            // Copy successor's data to current node
+            root->data = succ->data;
+
+            // Delete the inorder successor node
+            if (succParent != root) {
+                succParent->left = succ->right;
+            } else {
+                succParent->right = succ->right;
+            }
+
+            free(succ);   // Free memory allocated for the successor node
+        }
+    }
+    return root;   // Return the root pointer of the modified subtree
+}
+
+
+/*
+ * Function: search
+ * ----------------
+ * Searches for a node with the specified integer data in the binary search tree (BST).
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ * - data: Integer value to search for in the BST.
+ *
+ * Returns:
+ * - true if the node with `data` is found in the BST; false otherwise.
+ *
+ * Operation:
+ * - Recursively traverses the BST to find the node with `data`.
+ * - Returns true if `data` matches the value of the current node (`root->data`).
+ * - If `data` is greater than `root->data`, recursively searches in the right subtree (`root->right`).
+ * - If `data` is less than `root->data`, recursively searches in the left subtree (`root->left`).
+ * - Returns false if `data` is not found in the BST (when `root` is NULL).
+ *
+ * Usage:
+ * - Call this function to check if a node with `data` exists in the BST.
+ * - Ensure `root` points to the correct subtree in the BST where the search is to be performed.
+ *
+ * Notes:
+ * - This function assumes the BST is properly constructed and follows the binary search tree properties.
+ */
+bool search(Node* root, int data)
+{
+    if (!root) {
+        return false;   // Return false if subtree is empty
+    }
+    
+    if (data > root->data) {
+        return search(root->right, data);   // Recursively search in the right subtree
+    } else if (data < root->data) {
+        return search(root->left, data);    // Recursively search in the left subtree
+    } else {
+        return true;   // Found the node with `data`
+    }
+}
+
+
+/*
+ * Function: inOrderTr
+ * -------------------
+ * Performs an inorder traversal of the binary search tree (BST), printing node values in ascending order.
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ *
+ * Returns:
+ * - None
+ *
+ * Operation:
+ * - Recursively traverses the BST in inorder (left, root, right) fashion.
+ * - Prints the value of each node visited.
+ * - Stops traversal if `root` is NULL (empty subtree).
+ *
+ * Usage:
+ * - Call this function to perform an inorder traversal of the BST.
+ * - Ensure `root` points to the root of the BST from where traversal should begin.
+ *
+ * Notes:
+ * - This function assumes the BST is properly constructed and follows the binary search tree properties.
+ */
+void inOrderTr(Node* root)
+{
+    if (root != NULL) {
+        inOrderTr(root->left);      // Recursively traverse left subtree
+        printf("%d ", root->data);  // Print current node value
+        inOrderTr(root->right);     // Recursively traverse right subtree
+    }
+}
+
+
+/*
+ * Function: preOrder
+ * ------------------
+ * Performs a preorder traversal of the binary search tree (BST), printing node values.
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ *
+ * Returns:
+ * - None
+ *
+ * Operation:
+ * - Recursively traverses the BST in preorder (root, left, right) fashion.
+ * - Prints the value of each node visited.
+ * - Stops traversal if `root` is NULL (empty subtree).
+ *
+ * Usage:
+ * - Call this function to perform a preorder traversal of the BST.
+ * - Ensure `root` points to the root of the BST from where traversal should begin.
+ *
+ * Notes:
+ * - This function assumes the BST is properly constructed and follows the binary search tree properties.
+ */
+void preOrder(Node* root)
+{
+    if (root != NULL) {
+        printf("%d ", root->data);  // Print current node value
+        preOrder(root->left);       // Recursively traverse left subtree
+        preOrder(root->right);      // Recursively traverse right subtree
+    }
+}
+
+
+/*
+ * Function: postOrder
+ * -------------------
+ * Performs a postorder traversal of the binary search tree (BST), printing node values.
+ *
+ * Parameters:
+ * - root: Pointer to the root node of the current subtree in the BST.
+ *
+ * Returns:
+ * - None
+ *
+ * Operation:
+ * - Recursively traverses the BST in postorder (left, right, root) fashion.
+ * - Prints the value of each node visited.
+ * - Stops traversal if `root` is NULL (empty subtree).
+ *
+ * Usage:
+ * - Call this function to perform a postorder traversal of the BST.
+ * - Ensure `root` points to the root of the BST from where traversal should begin.
+ *
+ * Notes:
+ * - This function assumes the BST is properly constructed and follows the binary search tree properties.
+ */
+void postOrder(Node* root)
+{
+    if (root != NULL) {
+        postOrder(root->left);    // Recursively traverse left subtree
+        postOrder(root->right);   // Recursively traverse right subtree
+        printf("%d ", root->data);  // Print current node value
+    }
+}
