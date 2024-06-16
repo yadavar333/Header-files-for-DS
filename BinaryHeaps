@@ -1,0 +1,182 @@
+/*
+ * Structure: BHeap
+ * ----------------
+ * Binary Heap structure.
+ *
+ * Members:
+ * - h: Pointer to an array representing the binary heap.
+ * - size: Total size of the array `h` allocated for the heap.
+ * - length: Current number of elements in the binary heap.
+ *
+ * Usage:
+ * - Represents a binary heap structure used for priority queue operations.
+ * - The `h` array contains the elements of the heap.
+ * - `size` indicates the total allocated size of the array `h`.
+ * - `length` tracks the current number of elements in the binary heap.
+ *
+ * Notes:
+ * - The binary heap can be a min-heap or max-heap based on the application.
+ * - MaxHeap in this case.
+ * - Change all greater sign to lesser than sign for MinHeap.
+ * - Proper initialization and management of `h`, `size`, and `length` are required for correct heap operations.
+ */
+typedef struct _bheap
+{
+    int* h;         // Pointer to the array representing the binary heap
+    int size;       // Total size of the array `h` allocated for the heap
+    int length;     // Current number of elements in the binary heap
+} BHeap;
+
+
+/*
+ * Function: createBHeap
+ * ---------------------
+ * Creates a new binary heap with the specified initial size.
+ *
+ * Parameters:
+ * - size: Initial size of the binary heap to be created.
+ *
+ * Returns:
+ * - Pointer to the newly created BHeap structure.
+ * - Returns NULL if memory allocation fails.
+ *
+ * Operation:
+ * - Allocates memory for a new BHeap structure (`BHeap* x`) using malloc.
+ * - Allocates memory for the heap array (`x->h`) with size `size` using malloc.
+ * - Initializes `x->size` to `size`, indicating the total allocated size for the heap.
+ * - Initializes `x->length` to 0, indicating initially there are no elements in the heap.
+ *
+ * Usage:
+ * - Call this function to dynamically create a new binary heap with an initial capacity `size`.
+ * - Ensure to check the return value for NULL to handle memory allocation failures.
+ * - Properly manage and free the allocated memory using `freeBHeap` function when the heap is no longer needed.
+ *
+ * Notes:
+ * - The created binary heap can be used for priority queue operations.
+ * - Proper error handling for memory allocation failures is recommended.
+ */
+BHeap* createBHeap(int size)
+{
+    BHeap* x = (BHeap*)malloc(sizeof(BHeap));       // Allocate memory for BHeap structure
+    if (x == NULL) {
+        return NULL;                               // Return NULL if memory allocation fails
+    }
+    
+    x->h = (int*)malloc(sizeof(int) * size);       // Allocate memory for the heap array
+    if (x->h == NULL) {
+        free(x);                                   // Free allocated BHeap structure on failure
+        return NULL;
+    }
+    
+    x->size = size;                                // Set the total allocated size of the heap
+    x->length = 0;                                 // Initialize current number of elements in heap to 0
+    return x;                                      // Return pointer to the created BHeap structure
+}
+
+
+/*
+ * Function: addElementMaxBH
+ * -------------------------
+ * Adds a new element to a max binary heap and adjusts heap properties.
+ *
+ * Parameters:
+ * - bh: Pointer to the BHeap structure representing the max binary heap.
+ * - data: Integer value to be added to the max binary heap.
+ *
+ * Operation:
+ * - Inserts `data` at the end of the heap array (`bh->h[bh->length]`).
+ * - Adjusts the heap structure upwards to maintain the max heap property:
+ *   - Swaps `data` with its parent as long as `data` is greater than its parent.
+ *   - Continues swapping and adjusting until `data` is in the correct position or becomes the root.
+ * - Increases the `length` of the heap to reflect the addition of `data`.
+ *
+ * Usage:
+ * - Call this function to add an integer `data` to the max binary heap `bh` while maintaining max heap properties.
+ * - Ensure `bh` points to a valid BHeap structure initialized by `createBHeap`.
+ *
+ * Notes:
+ * - This function assumes `bh` is a valid pointer to a BHeap structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void addElementMaxBH(BHeap* bh, int data)
+{
+    // Macro to swap two elements
+    #define swap(a,b) {(a)+=(b);(b)=(a)-(b);(a)=(a)-(b);}
+    
+    bh->h[bh->length] = data;    // Insert data at the end of the heap array
+    int child = bh->length;      // Current index of the inserted element (child)
+    int parent = (child - 1) / 2;// Parent index of the inserted element
+    
+    // Heapify upwards to maintain max heap property
+    while (child != 0 && bh->h[child] > bh->h[parent]) {
+        swap(bh->h[child], bh->h[parent]);    // Swap child with parent if child is greater
+        child = parent;                       // Update child to parent index
+        parent = (child - 1) / 2;             // Update parent index
+    }
+    
+    bh->length++;    // Increase the length of the heap to reflect the addition of data
+}
+
+
+/*
+ * Function: extractMax
+ * --------------------
+ * Extracts the maximum element from a max binary heap and adjusts heap properties.
+ *
+ * Parameters:
+ * - bh: Pointer to the BHeap structure representing the max binary heap.
+ *
+ * Returns:
+ * - Integer value of the maximum element extracted from the heap.
+ *
+ * Operation:
+ * - Retrieves the maximum element (`bh->h[0]`) from the max binary heap `bh`.
+ * - Replaces the root (`bh->h[0]`) with the last element of the heap (`bh->h[bh->length - 1]`).
+ * - Decreases the `length` of the heap (`bh->length--`) to remove the extracted element.
+ * - Adjusts the heap downwards (heapify) to maintain the max heap property:
+ *   - Compares the parent with its children (`left child` and `right child`).
+ *   - Swaps the parent with the larger child if necessary, and continues until the heap property is restored.
+ *
+ * Usage:
+ * - Call this function to extract and retrieve the maximum element from the max binary heap `bh`.
+ * - Ensure `bh` points to a valid BHeap structure initialized by `createBHeap` and contains elements.
+ *
+ * Notes:
+ * - This function assumes `bh` is a valid pointer to a BHeap structure.
+ * - Proper error handling for NULL pointer or empty heap is not included for brevity.
+ */
+int extractMax(BHeap* bh)
+{
+    int del = bh->h[0];                      // Store the maximum element to be deleted
+    bh->h[0] = bh->h[bh->length - 1];        // Replace the root with the last element
+    bh->length--;                            // Decrease the length of the heap
+    
+    int parent = 0;                          // Start with the root as parent index
+    int lc, rc, child;                       // Variables for left child, right child, and selected child
+    
+    // Heapify downwards to maintain max heap property
+    while (1) {
+        lc = 2 * parent + 1;                 // Left child index
+        rc = 2 * parent + 2;                 // Right child index
+        
+        // Determine the larger child (if exists)
+        if (lc < bh->length && rc < bh->length)
+            child = bh->h[lc] > bh->h[rc] ? lc : rc;    // Choose the larger child
+        else if (lc < bh->length)
+            child = lc;                      // Only left child exists
+        else
+            break;                           // No children left
+        
+        // Swap parent with the larger child if child is greater
+        if (bh->h[child] > bh->h[parent]) {
+            int t = bh->h[child];
+            bh->h[child] = bh->h[parent];
+            bh->h[parent] = t;
+            parent = child;                  // Move down the heap
+        } else {
+            break;                           // Heap property restored
+        }
+    }
+    
+    return del;                              // Return the maximum element that was extracted
+}
