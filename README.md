@@ -5,4 +5,5 @@ Linked lists,
 Stacks,
 Queues,
 Binary Heaps,
-Binary search trees.
+Binary search trees and
+AVL trees.
