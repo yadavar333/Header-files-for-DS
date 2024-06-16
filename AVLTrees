@@ -1,0 +1,623 @@
+/*
+ * Struct: Node
+ * ------------
+ * Represents a node in an AVL tree.
+ *
+ * Fields:
+ * - data: Integer value stored in the node.
+ * - left: Pointer to the left child node.
+ * - right: Pointer to the right child node.
+ * - height: Height of the node in the AVL tree.
+ *
+ * Usage:
+ * - Each node contains an integer value (`data`), pointers to its left (`left`) and right (`right`) children,
+ *   and its own height (`height`) which helps in balancing the tree.
+ * - This structure is used to construct AVL trees, which are self-balancing binary search trees.
+ *
+ * Notes:
+ * - The height of a node is the length of the longest path from the node to a leaf.
+ * - AVL trees maintain a balance factor (height difference between left and right subtrees) of -1, 0, or 1 for every node,
+ *   ensuring the tree remains balanced and efficient for operations like insertion, deletion, and search.
+ */
+typedef struct _node {
+    int data;
+    struct _node* left;
+    struct _node* right;
+    int height;
+} Node;
+
+
+/*
+ * Struct: AVL
+ * -----------
+ * Represents an AVL tree.
+ *
+ * Fields:
+ * - root: Pointer to the root node of the AVL tree.
+ * - len: Number of nodes currently present in the AVL tree.
+ *
+ * Usage:
+ * - The AVL structure encapsulates the root of the AVL tree (`root`) and keeps track of the number of nodes (`len`).
+ * - AVL trees are self-balancing binary search trees where for every node, the heights of the left and right subtrees differ
+ *   by at most one (the balance factor is -1, 0, or 1).
+ *
+ * Notes:
+ * - AVL trees maintain their balance during insertion, deletion, and other operations, ensuring logarithmic time complexity
+ *   for these operations.
+ */
+typedef struct _avl {
+    Node* root;
+    int len;
+} AVL;
+
+
+/*
+ * Function: createNode
+ * --------------------
+ * Creates a new node with the given integer value for an AVL tree.
+ *
+ * Parameters:
+ * - val: Integer value to be stored in the new node.
+ *
+ * Returns:
+ * - Pointer to the newly created node (`Node*`).
+ *
+ * Operation:
+ * - Allocates memory for a new node (`Node*`).
+ * - Sets the integer value (`data`) of the node to `val`.
+ * - Initializes the left and right child pointers (`left`, `right`) to `NULL`.
+ * - Sets the height of the node (`height`) to 1, as it is a leaf node initially.
+ * - Returns the pointer to the newly created node.
+ *
+ * Usage:
+ * - Call this function to create a new node with a specific integer value for insertion into an AVL tree.
+ * - Ensure to assign the returned pointer appropriately, typically when adding a new node to the AVL tree.
+ *
+ * Notes:
+ * - This function is essential for dynamically allocating memory and initializing nodes in AVL tree operations.
+ * - It initializes the height of the node to facilitate AVL tree balancing during insertion and deletion.
+ */
+Node* createNode(int val)
+{
+    Node* x = (Node*)malloc(sizeof(Node));   // Allocate memory for a new node
+    x->data = val;                          // Set node data to the given value
+    x->left = NULL;                         // Initialize left child pointer to NULL
+    x->right = NULL;                        // Initialize right child pointer to NULL
+    x->height = 1;                          // Set initial height of the node to 1 (leaf node)
+    return x;                               // Return pointer to the newly created node
+}
+
+
+/*
+ * Function: createAvl
+ * -------------------
+ * Creates a new AVL tree with an empty root and initializes the node count.
+ *
+ * Returns:
+ * - Pointer to the newly created AVL tree (`AVL*`).
+ *
+ * Operation:
+ * - Allocates memory for a new AVL tree (`AVL*`).
+ * - Sets the root of the AVL tree (`root`) to `NULL`, indicating an empty tree.
+ * - Initializes the node count (`len`) to 0.
+ * - Returns the pointer to the newly created AVL tree.
+ *
+ * Usage:
+ * - Call this function to create a new AVL tree structure.
+ * - Ensure to assign the returned pointer to handle AVL tree operations and maintain the tree's structure.
+ *
+ * Notes:
+ * - AVL trees are self-balancing binary search trees where for every node, the heights of the left and right subtrees differ
+ *   by at most one (balance factor is -1, 0, or 1).
+ * - This function initializes the AVL tree structure, making it ready for operations like insertion, deletion, and search.
+ */
+AVL* createAvl()
+{
+    AVL* b = (AVL*)malloc(sizeof(AVL));   // Allocate memory for a new AVL tree
+    b->root = NULL;                      // Set the root of the AVL tree to NULL (empty tree)
+    b->len = 0;                          // Initialize the node count to 0
+    return b;                            // Return pointer to the newly created AVL tree
+}
+
+
+/*
+ * Function: height
+ * ----------------
+ * Calculates the height of a node in an AVL tree.
+ *
+ * Parameters:
+ * - nd: Pointer to the node for which height is to be calculated.
+ *
+ * Returns:
+ * - Height of the node (`int`).
+ *
+ * Operation:
+ * - If `nd` is `NULL`, returns 0 indicating the height of an empty subtree.
+ * - Otherwise, returns the `height` field of the node which stores the height of the subtree rooted at `nd`.
+ *
+ * Usage:
+ * - Call this function to obtain the height of a specific node in an AVL tree.
+ * - Ensure `nd` points to a valid node in the AVL tree structure.
+ *
+ * Notes:
+ * - This function is essential for AVL tree operations, especially during balancing to maintain tree height balance.
+ * - The height of a node is the length of the longest path from the node to a leaf node in its subtree.
+ */
+int height(Node* nd)
+{
+    if (nd == NULL)
+        return 0;            // Return 0 if node is NULL (empty subtree)
+    return nd->height;       // Return the height of the node
+}
+
+
+/*
+ * Function: getBalance
+ * --------------------
+ * Calculates the balance factor of a node in an AVL tree.
+ *
+ * Parameters:
+ * - root: Pointer to the node for which balance factor is to be calculated.
+ *
+ * Returns:
+ * - Balance factor of the node (`int`), defined as the difference between the heights
+ *   of its left and right subtrees (height(left) - height(right)).
+ *
+ * Operation:
+ * - Computes the balance factor as height of the left subtree (`height(root->left)`)
+ *   minus height of the right subtree (`height(root->right)`).
+ * - Returns the calculated balance factor which indicates how balanced the AVL tree is
+ *   at the given node:
+ *     - If balance factor is:
+ *       - 0: Both subtrees have equal height.
+ *       - Positive: Left subtree is taller.
+ *       - Negative: Right subtree is taller.
+ *
+ * Usage:
+ * - Call this function to obtain the balance factor of a specific node in an AVL tree.
+ * - Ensure `root` points to a valid node within the AVL tree structure.
+ *
+ * Notes:
+ * - The balance factor helps in determining if rotations are necessary to maintain
+ *   AVL tree properties (balance factor should be -1, 0, or 1 for each node).
+ */
+int getBalance(Node* root)
+{
+    if (root == NULL)
+        return 0;                              // Return 0 if node is NULL (empty subtree)
+    return height(root->left) - height(root->right);  // Return balance factor of the node
+}
+
+
+/*
+ * Function: rightRotate
+ * ---------------------
+ * Performs a right rotation on a node in an AVL tree to balance the tree.
+ *
+ * Parameters:
+ * - a: Pointer to the node around which the right rotation is performed.
+ *
+ * Returns:
+ * - Pointer to the new root of the subtree after the rotation (`Node*`).
+ *
+ * Operation:
+ * - Performs a right rotation around node `a`:
+ *     1. Sets node `b` as the left child of `a` (`b = a->left`).
+ *     2. Sets node `c` as the right child of `b` (`c = b->right`).
+ *     3. Makes `b` the new root of the subtree by adjusting pointers:
+ *        - `b->right` points to `a`.
+ *        - `a->left` points to `c`.
+ *     4. Updates the heights of nodes `a` and `b` after rotation to maintain AVL balance.
+ * - Returns the pointer to the new root of the subtree (`b`).
+ *
+ * Usage:
+ * - Call this function to perform a right rotation around a specific node `a` in an AVL tree.
+ * - Ensure `a` is not `NULL` and has a non-null left child (`a->left`) to perform the rotation.
+ *
+ * Notes:
+ * - Right rotations are used to restore the AVL tree balance when the left subtree of a node
+ *   becomes taller than the right subtree by more than one level (balance factor > 1).
+ */
+Node* rightRotate(Node* a)
+{
+    Node* b = a->left;            // Assign left child of `a` to `b`
+    Node* c = b->right;           // Assign right child of `b` to `c`
+
+    // Perform rotation
+    b->right = a;                 // `b` becomes the new root, `a` becomes right child of `b`
+    a->left = c;                  // `c` becomes left child of `a`
+
+    // Update heights
+    a->height = max(height(a->left), height(a->right)) + 1;  // Update height of `a`
+    b->height = max(height(b->left), height(b->right)) + 1;  // Update height of `b`
+
+    return b;                     // Return new root of the subtree (`b`)
+}
+
+
+/*
+ * Function: leftRotate
+ * --------------------
+ * Performs a left rotation on a node in an AVL tree to balance the tree.
+ *
+ * Parameters:
+ * - a: Pointer to the node around which the left rotation is performed.
+ *
+ * Returns:
+ * - Pointer to the new root of the subtree after the rotation (`Node*`).
+ *
+ * Operation:
+ * - Performs a left rotation around node `a`:
+ *     1. Sets node `b` as the right child of `a` (`b = a->right`).
+ *     2. Sets node `c` as the left child of `b` (`c = b->left`).
+ *     3. Makes `b` the new root of the subtree by adjusting pointers:
+ *        - `b->left` points to `a`.
+ *        - `a->right` points to `c`.
+ *     4. Updates the heights of nodes `a` and `b` after rotation to maintain AVL balance.
+ * - Returns the pointer to the new root of the subtree (`b`).
+ *
+ * Usage:
+ * - Call this function to perform a left rotation around a specific node `a` in an AVL tree.
+ * - Ensure `a` is not `NULL` and has a non-null right child (`a->right`) to perform the rotation.
+ *
+ * Notes:
+ * - Left rotations are used to restore the AVL tree balance when the right subtree of a node
+ *   becomes taller than the left subtree by more than one level (balance factor < -1).
+ */
+Node* leftRotate(Node* a)
+{
+    Node* b = a->right;           // Assign right child of `a` to `b`
+    Node* c = b->left;            // Assign left child of `b` to `c`
+
+    // Perform rotation
+    b->left = a;                  // `b` becomes the new root, `a` becomes left child of `b`
+    a->right = c;                 // `c` becomes right child of `a`
+
+    // Update heights
+    a->height = max(height(a->left), height(a->right)) + 1;  // Update height of `a`
+    b->height = max(height(b->left), height(b->right)) + 1;  // Update height of `b`
+
+    return b;                     // Return new root of the subtree (`b`)
+}
+
+
+/*
+ * Function: insertNode
+ * --------------------
+ * Inserts a new node with given data into an AVL tree and balances the tree if necessary.
+ *
+ * Parameters:
+ * - root: Pointer to the root of the AVL tree where the node is to be inserted.
+ * - data: Integer value to be inserted into the AVL tree.
+ *
+ * Returns:
+ * - Pointer to the root of the AVL tree after insertion (`Node*`).
+ *
+ * Operation:
+ * - Recursively inserts a new node with `data` into the AVL tree rooted at `root`.
+ * - After insertion, updates the height of the current node (`root->height`) based on the maximum height
+ *   of its left and right subtrees (`height(root->left)` and `height(root->right)`).
+ * - Calculates the balance factor (`bf`) of the current node to check for AVL tree balance:
+ *     - If `bf` > 1 and `data` < `root->left->data`: Performs a right rotation (`rightRotate(root)`) to handle L-L imbalance.
+ *     - If `bf` > 1 and `data` > `root->left->data`: Performs a left rotation on `root->left`, followed by a right rotation on `root`
+ *       to handle L-R imbalance.
+ *     - If `bf` < -1 and `data` > `root->right->data`: Performs a left rotation (`leftRotate(root)`) to handle R-R imbalance.
+ *     - If `bf` < -1 and `data` < `root->right->data`: Performs a right rotation on `root->right`, followed by a left rotation on `root`
+ *       to handle R-L imbalance.
+ * - Returns the pointer to the root of the AVL tree after insertion and balancing.
+ *
+ * Usage:
+ * - Call this function to insert a new node with `data` into an AVL tree and ensure AVL balance.
+ * - Ensure `root` points to a valid node within the AVL tree structure.
+ *
+ * Notes:
+ * - AVL tree is a self-balancing binary search tree where the balance factor of every node
+ *   is -1, 0, or 1 to maintain balanced heights of left and right subtrees.
+ * - Rotations are performed to maintain AVL tree properties after insertion to prevent skewing
+ *   of the tree and ensure efficient search and retrieval operations.
+ */
+Node* insertNode(Node* root, int data)
+{
+    if (root == NULL)
+        return createNode(data);  // Create a new node if tree is empty
+
+    // Insert data into appropriate subtree
+    if (data > root->data)
+        root->right = insertNode(root->right, data);
+    else if (data < root->data)
+        root->left = insertNode(root->left, data);
+
+    // Update height of the current node
+    root->height = max(height(root->left), height(root->right)) + 1;
+
+    // Get balance factor of the current node
+    int bf = getBalance(root);
+
+    // Perform rotations if tree becomes unbalanced
+    if (bf > 1 && data < root->left->data)
+        return rightRotate(root);   // L-L imbalance
+
+    if (bf > 1 && data > root->left->data) {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);   // L-R imbalance
+    }
+
+    if (bf < -1 && data > root->right->data)
+        return leftRotate(root);    // R-R imbalance
+
+    if (bf < -1 && data < root->right->data) {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);    // R-L imbalance
+    }
+
+    return root;  // Return the (unchanged) root pointer
+}
+
+
+/*
+ * Function: deleteNode
+ * --------------------
+ * Deletes a node with given data from an AVL tree and balances the tree if necessary.
+ *
+ * Parameters:
+ * - root: Pointer to the root of the AVL tree from where the node is to be deleted.
+ * - data: Integer value to be deleted from the AVL tree.
+ *
+ * Returns:
+ * - Pointer to the root of the AVL tree after deletion (`Node*`).
+ *
+ * Operation:
+ * - Recursively deletes a node with `data` from the AVL tree rooted at `root`.
+ * - After deletion, updates the height of the current node (`root->height`) based on the maximum height
+ *   of its left and right subtrees (`height(root->left)` and `height(root->right)`).
+ * - Calculates the balance factor (`bf`) of the current node to check for AVL tree balance:
+ *     - If `bf` > 1 and `data` < `root->left->data`: Performs a right rotation (`rightRotate(root)`) to handle L-L imbalance.
+ *     - If `bf` > 1 and `data` > `root->left->data`: Performs a left rotation on `root->left`, followed by a right rotation on `root`
+ *       to handle L-R imbalance.
+ *     - If `bf` < -1 and `data` > `root->right->data`: Performs a left rotation (`leftRotate(root)`) to handle R-R imbalance.
+ *     - If `bf` < -1 and `data` < `root->right->data`: Performs a right rotation on `root->right`, followed by a left rotation on `root`
+ *       to handle R-L imbalance.
+ * - Returns the pointer to the root of the AVL tree after deletion and balancing.
+ *
+ * Usage:
+ * - Call this function to delete a node with `data` from an AVL tree and ensure AVL balance.
+ * - Ensure `root` points to a valid node within the AVL tree structure.
+ *
+ * Notes:
+ * - AVL tree is a self-balancing binary search tree where the balance factor of every node
+ *   is -1, 0, or 1 to maintain balanced heights of left and right subtrees.
+ * - Rotations are performed to maintain AVL tree properties after deletion to prevent skewing
+ *   of the tree and ensure efficient search and retrieval operations.
+ */
+Node* deleteNode(Node* root, int data)
+{
+    if (root == NULL)
+        return root;  // Return NULL if tree is empty or node is not found
+
+    // Search for the node to be deleted
+    if (data > root->data)
+        root->right = deleteNode(root->right, data);
+    else if (data < root->data)
+        root->left = deleteNode(root->left, data);
+    else {
+        // Node found, perform deletion
+        if (root->left == NULL) {
+            // Case 1: Node has no left child or both children are NULL
+            return root->right;  // Replace root with its right child (NULL if it doesn't exist)
+        } else if (root->right == NULL) {
+            // Case 2: Node has no right child
+            return root->left;   // Replace root with its left child
+        } else {
+            // Case 3: Node has both left and right children
+            Node* succParent = root;
+            Node* succ = root->left;
+
+            // Find the inorder successor (leftmost node in the right subtree)
+            while (succ->right != NULL) {
+                succParent = succ;
+                succ = succ->right;
+            }
+
+            // Copy data of the inorder successor to the root
+            root->data = succ->data;
+
+            // Delete the inorder successor node
+            if (succParent != root)
+                succParent->right = succ->left;  // Link parent's right child to successor's left child
+            else
+                succParent->left = succ->left;   // Link parent's left child to successor's left child
+            free(succ);  // Free memory allocated to the successor node
+        }
+    }
+
+    // Update height of the current node
+    if (root != NULL)
+        root->height = max(height(root->left), height(root->right)) + 1;
+
+    // Get balance factor of the current node
+    int bf = getBalance(root);
+
+    // Perform rotations if tree becomes unbalanced
+    if (bf > 1 && data < root->left->data)
+        return rightRotate(root);   // L-L imbalance
+
+    if (bf > 1 && data > root->left->data) {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);   // L-R imbalance
+    }
+
+    if (bf < -1 && data > root->right->data)
+        return leftRotate(root);    // R-R imbalance
+
+    if (bf < -1 && data < root->right->data) {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);    // R-L imbalance
+    }
+
+    return root;  // Return the (unchanged) root pointer
+}
+
+
+/*
+ * Function: search
+ * ----------------
+ * Searches for a given data value in a binary search tree (BST).
+ *
+ * Parameters:
+ * - root: Pointer to the root of the BST where the search starts (`Node*`).
+ * - data: Integer value to be searched for in the BST.
+ *
+ * Returns:
+ * - true if `data` is found in the BST, false otherwise (`bool`).
+ *
+ * Operation:
+ * - Recursively searches for `data` starting from the root node.
+ * - If `root` is NULL, returns false as the tree is empty.
+ * - Compares `data` with the current node's data:
+ *     - If `data` is greater than the current node's data (`root->data`), searches in the right subtree (`root->right`).
+ *     - If `data` is less than the current node's data, searches in the left subtree (`root->left`).
+ *     - If `data` matches the current node's data, returns true indicating the data is found.
+ * - Returns false if `data` is not found in the BST after traversing the tree.
+ *
+ * Usage:
+ * - Call this function to check if a specific `data` value exists in a BST.
+ * - Ensure `root` points to a valid node within the BST structure.
+ *
+ * Notes:
+ * - BST is a binary tree where for each node, the left subtree contains only nodes with values less than the node's value,
+ *   and the right subtree contains only nodes with values greater than the node's value.
+ * - The function utilizes recursion to efficiently search through the BST structure.
+ */
+bool search(Node* root, int data)
+{
+    if (!root)
+        return false;  // Return false if tree is empty or node is not found
+
+    // Compare data with current node's data
+    if (data > root->data)
+        return search(root->right, data);  // Search in the right subtree
+    else if (data < root->data)
+        return search(root->left, data);   // Search in the left subtree
+    else
+        return true;  // Return true if data is found in the current node
+}
+
+
+/*
+ * Function: inOrderTr
+ * -------------------
+ * Performs an in-order traversal of a binary search tree (BST).
+ *
+ * Parameters:
+ * - root: Pointer to the root of the BST where the traversal starts (`Node*`).
+ *
+ * Returns:
+ * - void
+ *
+ * Operation:
+ * - Recursively traverses the BST in the order: left subtree, current node, right subtree.
+ * - Prints the data of each node as it visits.
+ * - Stops when `root` is NULL, indicating the end of a subtree.
+ *
+ * Usage:
+ * - Call this function to print all nodes of a BST in sorted order (ascending).
+ * - Ensure `root` points to a valid node within the BST structure.
+ *
+ * Notes:
+ * - In-order traversal visits nodes in ascending order for a BST.
+ * - The function utilizes recursion to traverse the BST structure.
+ */
+void inOrderTr(Node* root)
+{
+    if (root != NULL)
+    {
+        // Traverse left subtree
+        inOrderTr(root->left);
+
+        // Print current node's data
+        printf("%d ", root->data);
+
+        // Traverse right subtree
+        inOrderTr(root->right);
+    }
+}
+
+
+/*
+ * Function: preOrder
+ * ------------------
+ * Performs a pre-order traversal of a binary tree.
+ *
+ * Parameters:
+ * - root: Pointer to the root of the binary tree where the traversal starts (`Node*`).
+ *
+ * Returns:
+ * - void
+ *
+ * Operation:
+ * - Recursively traverses the binary tree in the order: current node, left subtree, right subtree.
+ * - Prints the data of each node as it visits.
+ * - Stops when `root` is NULL, indicating the end of a subtree.
+ *
+ * Usage:
+ * - Call this function to print all nodes of a binary tree in pre-order.
+ * - Ensure `root` points to a valid node within the binary tree structure.
+ *
+ * Notes:
+ * - Pre-order traversal visits nodes in the order: root, left, right.
+ * - The function utilizes recursion to traverse the binary tree structure.
+ */
+void preOrder(Node* root)
+{
+    if (root != NULL)
+    {
+        // Print current node's data
+        printf("%d ", root->data);
+
+        // Traverse left subtree
+        preOrder(root->left);
+
+        // Traverse right subtree
+        preOrder(root->right);
+    }
+}
+
+
+/*
+ * Function: postOrder
+ * -------------------
+ * Performs a post-order traversal of a binary tree.
+ *
+ * Parameters:
+ * - root: Pointer to the root of the binary tree where the traversal starts (`Node*`).
+ *
+ * Returns:
+ * - void
+ *
+ * Operation:
+ * - Recursively traverses the binary tree in the order: left subtree, right subtree, current node.
+ * - Prints the data of each node as it visits.
+ * - Stops when `root` is NULL, indicating the end of a subtree.
+ *
+ * Usage:
+ * - Call this function to print all nodes of a binary tree in post-order.
+ * - Ensure `root` points to a valid node within the binary tree structure.
+ *
+ * Notes:
+ * - Post-order traversal visits nodes in the order: left, right, root.
+ * - The function utilizes recursion to traverse the binary tree structure.
+ */
+void postOrder(Node* root)
+{
+    if (root != NULL)
+    {
+        // Traverse left subtree
+        postOrder(root->left);
+
+        // Traverse right subtree
+        postOrder(root->right);
+
+        // Print current node's data
+        printf("%d ", root->data);
+    }
+}
