@@ -1,0 +1,303 @@
+/*
+ * Structure: Stack
+ * -----------------
+ * Represents a stack data structure using an array.
+ *
+ * Members:
+ * - a: Pointer to an integer array that holds the elements of the stack.
+ * - top: Index of the current top element in the stack.
+ * - size: Maximum capacity of the stack (size of array `a`).
+ *
+ * Usage:
+ * - `a`: This member points to the dynamically allocated array that stores the stack elements.
+ * - `top`: Tracks the current top element in the stack.
+ * - `size`: Indicates the total capacity of the stack.
+ *
+ * Notes:
+ * - The stack is implemented using an integer array `a` where elements are pushed and popped from `top`.
+ * - `top` is initialized to `-1` when the stack is empty.
+ */
+typedef struct _stack
+{
+    int* a;       // Pointer to array of integers (stack elements)
+    int top;      // Index of the top element in the stack
+    int size;     // Maximum capacity of the stack
+} Stack;
+
+
+/*
+ * Function: createStack
+ * ---------------------
+ * Creates a new stack and initializes its properties.
+ *
+ * Returns:
+ * - A pointer to the newly created Stack structure.
+ *
+ * Memory Allocation:
+ * - Allocates memory for the Stack structure itself.
+ * - Allocates memory for the integer array `a` inside the Stack to hold 16 elements initially.
+ *
+ * Initialization:
+ * - Sets `top` to `-1`, indicating the stack is initially empty.
+ * - Sets `size` to `16`, indicating the initial capacity of the stack.
+ *
+ * Usage:
+ * - Call this function to create a new stack. Make sure to handle memory deallocation
+ *   using `destroyStack` function when the stack is no longer needed to avoid memory leaks.
+ *
+ * Notes:
+ * - The initial size of the stack (`16` elements) is fixed but can be adjusted based on requirements.
+ * - Memory allocation failure is not handled in this function for simplicity.
+ */
+Stack* createStack()
+{
+    Stack* x = (Stack*)malloc(sizeof(Stack));      // Allocate memory for the Stack structure
+    x->a = (int*)malloc(sizeof(int) * 16);         // Allocate memory for the integer array 'a' (initially size 16)
+    x->top = -1;                                   // Initialize 'top' to -1 (empty stack)
+    x->size = 16;                                  // Set the initial size of the stack to 16
+
+    return x;                                      // Return a pointer to the newly created Stack
+}
+
+
+/*
+ * Function: isEmpty
+ * -----------------
+ * Checks if the stack is empty.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure to be checked.
+ *
+ * Returns:
+ * - `true` if the stack is empty (top is -1), otherwise `false`.
+ *
+ * Usage:
+ * - Call this function to determine if the specified stack `st` is empty.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+bool isEmpty(Stack* st)
+{
+    if (st->top == -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*
+ * Function: isFull
+ * ----------------
+ * Checks if the stack is full.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure to be checked.
+ *
+ * Returns:
+ * - `true` if the stack `st` is full (top is equal to `size - 1`), otherwise `false`.
+ *
+ * Usage:
+ * - Call this function to determine if the specified stack `st` is full.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+bool isFull(Stack* st)
+{
+    if (st->top == st->size - 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*
+ * Function: changeSize
+ * --------------------
+ * Changes the size of the stack if it is full.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure whose size needs to be adjusted.
+ *
+ * Memory Reallocation:
+ * - If the stack `st` is full (determined using `isFull` function), reallocates memory
+ *   for the integer array `a` inside `st` to increase its size by half.
+ *
+ * Usage:
+ * - Call this function to dynamically increase the size of the stack `st` when it becomes full.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void changeSize(Stack* st)
+{
+    if (isFull(st)) {
+        st->a = realloc(st->a, sizeof(int) * (st->size + (st->size / 2)));  // Increase size of 'a' by 50%
+        st->size = st->size + (st->size / 2);                              // Update 'size' to the new capacity
+    }
+}
+
+
+/*
+ * Function: push
+ * --------------
+ * Pushes an element onto the stack.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure onto which the element will be pushed.
+ * - data: Integer value to be pushed onto the stack.
+ *
+ * Operation:
+ * - Checks if the stack `st` is full using `isFull` function.
+ * - If full, calls `changeSize` function to increase the stack size.
+ * - Increments the `top` index of `st` and assigns `data` to the top of the stack.
+ *
+ * Usage:
+ * - Call this function to push an integer `data` onto the specified stack `st`.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void push(Stack* st, int data)
+{
+    if (isFull(st)) {
+        changeSize(st);       // Increase stack size if full
+    }
+    st->top++;                // Move top pointer up
+    st->a[st->top] = data;    // Push data onto stack
+}
+
+
+/*
+ * Function: pop
+ * -------------
+ * Removes and returns the top element from the stack.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure from which the element will be popped.
+ *
+ * Returns:
+ * - The integer value of the element that was popped from the stack.
+ *
+ * Operation:
+ * - Decrements the `top` index of `st` to remove the top element.
+ * - Returns the element that was removed from the stack.
+ *
+ * Usage:
+ * - Call this function to remove and retrieve the top element from the specified stack `st`.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ * - Ensure the stack is not empty (checked separately using `isEmpty` function before calling `pop`).
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int pop(Stack* st)
+{
+    st->top--;                    // Decrement top to remove the top element
+    return st->a[st->top + 1];    // Return the element that was removed
+}
+
+
+/*
+ * Function: peek
+ * --------------
+ * Returns the value of the top element of the stack without removing it.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure from which to retrieve the top element.
+ *
+ * Returns:
+ * - The integer value of the top element of the stack.
+ *
+ * Operation:
+ * - Accesses the element at index `st->top` in the array `a` of stack `st`.
+ * - Returns the value of the top element without modifying the stack.
+ *
+ * Usage:
+ * - Call this function to retrieve the value of the top element from the specified stack `st`.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ * - Ensure the stack is not empty (checked separately using `isEmpty` function before calling `peek`).
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int peek(Stack* st)
+{
+    return st->a[st->top];    // Return the value of the top element of the stack
+}
+
+
+/*
+ * Function: stackLength
+ * ---------------------
+ * Returns the number of elements currently in the stack.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure whose length is to be determined.
+ *
+ * Returns:
+ * - The number of elements currently in the stack.
+ *
+ * Operation:
+ * - Returns `st->top + 1`, which represents the number of elements currently pushed onto the stack.
+ *
+ * Usage:
+ * - Call this function to retrieve the current number of elements in the specified stack `st`.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int stackLength(Stack* st)
+{
+    return st->top + 1;    // Return the number of elements currently in the stack
+}
+
+
+/*
+ * Function: displayStack
+ * ----------------------
+ * Displays the elements of the stack from top to bottom.
+ *
+ * Parameters:
+ * - st: Pointer to the Stack structure whose elements are to be displayed.
+ *
+ * Operation:
+ * - Checks if the stack `st` is empty using `isEmpty` function.
+ * - If empty, prints "Stack is empty." message.
+ * - Otherwise, iterates through the elements of the stack from top to bottom and prints each element.
+ *
+ * Usage:
+ * - Call this function to print the elements of the specified stack `st` from top to bottom.
+ * - Ensure `st` points to a valid Stack structure initialized by `createStack`.
+ *
+ * Notes:
+ * - This function assumes `st` is a valid pointer to a Stack structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void displayStack(Stack* st)
+{
+    if (isEmpty(st)) {
+        printf("Stack is empty.\n");    // Print message if stack is empty
+    } else {
+        // Print elements of the stack from top to bottom
+        for (int i = st->top; i >= 0; i--) {
+            printf("%d ", st->a[i]);
+        }
+        printf("\n");    // Print newline after displaying all elements
+    }
+}
