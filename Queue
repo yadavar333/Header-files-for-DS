@@ -1,0 +1,310 @@
+/*
+ * Structure: Queue
+ * ----------------
+ * Represents a queue data structure using an array.
+ *
+ * Members:
+ * - A: Pointer to an integer array that holds the elements of the queue.
+ * - length: Number of elements currently in the queue.
+ * - front: Index of the front element in the queue.
+ * - rear: Index of the rear element in the queue.
+ * - size: Maximum capacity of the queue (size of array `A`).
+ *
+ * Usage:
+ * - `A`: This member points to the dynamically allocated array that stores the queue elements.
+ * - `length`: Indicates the current number of elements in the queue.
+ * - `front`: Index of the front element in the queue.
+ * - `rear`: Index of the rear element in the queue.
+ * - `size`: Maximum capacity of the queue, which is the size of the array `A`.
+ *
+ * Notes:
+ * - The queue is implemented using an integer array `A` where elements are added to the rear and removed from the front.
+ * - Operations like enqueue and dequeue modify `front`, `rear`, and `length` accordingly.
+ */
+typedef struct _queue {
+    int *A;       // Pointer to array of integers (queue elements)
+    int length;   // Number of elements currently in the queue
+    int front;    // Index of the front element in the queue
+    int rear;     // Index of the rear element in the queue
+    int size;     // Maximum capacity of the queue
+} Queue;
+
+
+/*
+ * Function: createQueue
+ * ---------------------
+ * Creates a new queue and initializes its properties.
+ *
+ * Parameters:
+ * - capacity: Maximum capacity of the queue to be created.
+ *
+ * Returns:
+ * - A pointer to the newly created Queue structure.
+ *
+ * Memory Allocation:
+ * - Allocates memory for the Queue structure itself.
+ * - Allocates memory for the integer array `A` inside the Queue to hold `capacity` elements.
+ *
+ * Initialization:
+ * - Sets `front` to `0`, indicating the front of the queue.
+ * - Sets `rear` to `capacity - 1`, indicating the rear of the queue.
+ * - Sets `length` to `0`, indicating the queue is initially empty.
+ * - Sets `size` to `capacity`, specifying the maximum capacity of the queue.
+ *
+ * Usage:
+ * - Call this function to create a new queue with the specified capacity.
+ * - Ensure to handle memory deallocation using `destroyQueue` function when the queue is no longer needed to avoid memory leaks.
+ *
+ * Notes:
+ * - The initial size of the queue (`capacity` elements) is fixed but can be adjusted based on requirements.
+ * - Memory allocation failure is not handled in this function for simplicity.
+ */
+Queue* createQueue(int capacity)
+{
+    Queue* x = (Queue*)malloc(sizeof(Queue));        // Allocate memory for the Queue structure
+    x->A = (int*)malloc(sizeof(int) * capacity);     // Allocate memory for the integer array 'A' (capacity elements)
+    x->front = 0;                                    // Initialize 'front' to 0 (empty queue)
+    x->length = 0;                                   // Initialize 'length' to 0 (no elements in queue)
+    x->rear = capacity - 1;                          // Initialize 'rear' to capacity - 1
+    x->size = capacity;                              // Set the maximum capacity of the queue
+
+    return x;                                        // Return a pointer to the newly created Queue
+}
+
+
+/*
+ * Function: isEmpty
+ * -----------------
+ * Checks if the queue is empty.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure to be checked.
+ *
+ * Returns:
+ * - `true` if the queue `q` is empty (length is 0), otherwise `false`.
+ *
+ * Usage:
+ * - Call this function to determine if the specified queue `q` is empty.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+bool isEmpty(Queue* q)
+{
+    return q->length == 0;    // Return true if length of queue is 0 (empty), otherwise false
+}
+
+
+/*
+ * Function: isFull
+ * ----------------
+ * Checks if the queue is full.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure to be checked.
+ *
+ * Returns:
+ * - `true` if the queue `q` is full (length equals size), otherwise `false`.
+ *
+ * Usage:
+ * - Call this function to determine if the specified queue `q` is full.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+bool isFull(Queue* q)
+{
+    return q->length == q->size;    // Return true if length of queue equals size, otherwise false
+}
+
+
+/*
+ * Function: enqueue
+ * -----------------
+ * Adds an element to the rear of the queue.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure where the element will be added.
+ * - item: Integer value to be added to the queue.
+ *
+ * Operation:
+ * - Checks if the queue `q` is full using `isFull` function.
+ * - If full, returns immediately without adding the element.
+ * - Moves the `rear` pointer circularly to the next position using modulo operation.
+ * - Inserts `item` at the updated `rear` position in the array `A` of the queue.
+ * - Increments the `length` of the queue to reflect the addition of the new element.
+ *
+ * Usage:
+ * - Call this function to add an integer `item` to the rear of the specified queue `q`.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ * - Ensure to check if the queue is full using `isFull` before calling `enqueue`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void enqueue(Queue* q, int item)
+{
+    if (isFull(q)) {
+        return;    // Return immediately if the queue is full
+    }
+    
+    q->rear = (q->rear + 1) % q->size;    // Move rear circularly to the next position
+    q->A[q->rear] = item;                 // Insert item at the updated rear position
+    q->length++;                          // Increment the length of the queue
+}
+
+
+/*
+ * Function: dequeue
+ * -----------------
+ * Removes and returns the front element from the queue.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure from which the element will be removed.
+ *
+ * Returns:
+ * - Integer value of the element removed from the front of the queue.
+ * - Returns INT_MIN if the queue `q` is empty.
+ *
+ * Operation:
+ * - Checks if the queue `q` is empty using `isEmpty` function.
+ * - If empty, returns INT_MIN (indicating no valid integer could be dequeued).
+ * - Retrieves the element to be dequeued from the front of the queue (`q->A[q->front]`).
+ * - Moves the `front` pointer circularly to the next position using modulo operation.
+ * - Decrements the `length` of the queue to reflect the removal of the front element.
+ *
+ * Usage:
+ * - Call this function to remove and retrieve the front element from the specified queue `q`.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ * - Ensure to check if the queue is empty using `isEmpty` before calling `dequeue`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int dequeue(Queue* q)
+{
+    if (isEmpty(q)) {
+        return INT_MIN;    // Return INT_MIN if the queue is empty
+    }
+    
+    int del = q->A[q->front];              // Element to be dequeued
+    q->front = (q->front + 1) % q->size;   // Move front circularly to the next position
+    q->length--;                           // Decrement the length of the queue
+    return del;                            // Return the dequeued element
+}
+
+
+/*
+ * Function: front
+ * ---------------
+ * Returns the front element of the queue without removing it.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure from which to retrieve the front element.
+ *
+ * Returns:
+ * - Integer value of the front element of the queue.
+ * - Returns INT_MIN if the queue `q` is empty.
+ *
+ * Operation:
+ * - Checks if the queue `q` is empty using `isEmpty` function.
+ * - If empty, returns INT_MIN (indicating no valid integer at the front).
+ * - Returns the element at the `front` position of the queue (`q->A[q->front]`).
+ *
+ * Usage:
+ * - Call this function to retrieve the front element from the specified queue `q` without removing it.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ * - Ensure to check if the queue is empty using `isEmpty` before calling `front`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int front(Queue* q)
+{
+    if (isEmpty(q)) {
+        return INT_MIN;    // Return INT_MIN if the queue is empty
+    }
+    
+    return q->A[q->front];    // Return the element at the front of the queue
+}
+
+
+/*
+ * Function: rear
+ * --------------
+ * Returns the rear element of the queue without removing it.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure from which to retrieve the rear element.
+ *
+ * Returns:
+ * - Integer value of the rear element of the queue.
+ * - Returns INT_MIN if the queue `q` is empty.
+ *
+ * Operation:
+ * - Checks if the queue `q` is empty using `isEmpty` function.
+ * - If empty, returns INT_MIN (indicating no valid integer at the rear).
+ * - Returns the element at the `rear` position of the queue (`q->A[q->rear]`).
+ *
+ * Usage:
+ * - Call this function to retrieve the rear element from the specified queue `q` without removing it.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ * - Ensure to check if the queue is empty using `isEmpty` before calling `rear`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+int rear(Queue* q)
+{
+    if (isEmpty(q)) {
+        return INT_MIN;    // Return INT_MIN if the queue is empty
+    }
+    
+    return q->A[q->rear];    // Return the element at the rear of the queue
+}
+
+
+/*
+ * Function: display
+ * -----------------
+ * Displays all elements currently in the queue.
+ *
+ * Parameters:
+ * - q: Pointer to the Queue structure to be displayed.
+ *
+ * Operation:
+ * - Checks if the queue `q` is empty using `isEmpty` function.
+ * - If empty, prints "Queue is Empty." and exits.
+ * - If not empty, iterates through the queue using circular indexing:
+ *   - Starts iterating from the `front` position of the queue.
+ *   - Prints each element in the queue until all elements (`length`) are printed.
+ *
+ * Usage:
+ * - Call this function to print all elements currently in the specified queue `q`.
+ * - Ensure `q` points to a valid Queue structure initialized by `createQueue`.
+ *
+ * Notes:
+ * - This function assumes `q` is a valid pointer to a Queue structure.
+ * - Proper error handling for NULL pointer or invalid structure is not included for brevity.
+ */
+void display(Queue* q)
+{
+    if (isEmpty(q)) {
+        printf("Queue is Empty.\n");    // Print message and return if queue is empty
+    } else {
+        int i = q->front;    // Start iterating from the front of the queue
+        for (int j = 0; j < q->length; j++) {
+            printf("%d ", q->A[i]);    // Print each element in the queue
+            i = (i + 1) % q->size;     // Move to the next element using circular indexing
+        }
+        printf("\n");
+    }
+}
